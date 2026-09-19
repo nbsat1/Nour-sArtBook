@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nour's Art Book — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --burgundy-deep:#3E1120;
+    --burgundy:#6B2338;
+    --burgundy-mid:#8A3B52;
+    --beige-bg:#F3E9D8;
+    --cream:#FBF5E9;
+    --gold:#AD8A4E;
+    --gold-soft:#D7BE8C;
+    --sage:#77826A;
+    --ink:#2B1B1D;
+    --ink-soft:#5A4A48;
+    --line: rgba(59,17,32,0.15);
+    --danger:#A23B3B;
+    --danger-bg:rgba(162,59,59,0.08);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--beige-bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; color:var(--burgundy-deep); margin:0; font-weight:500; }
+  button{ font-family:inherit; }
+  img{ max-width:100%; display:block; }
+  @media (prefers-reduced-motion: reduce){ *{ transition-duration:0.01ms !important; } }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    width:100%; max-width:380px;
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:40px 32px;
+    text-align:center;
+    box-shadow:0 20px 50px -25px rgba(62,17,32,0.4);
+  }
+  .login-card .brand{
+    font-family:'Fraunces', serif; font-style:italic; font-size:1.5rem;
+    color:var(--burgundy-deep); margin-bottom:4px;
+  }
+  .login-card .sub{ color:var(--ink-soft); font-size:0.9rem; margin-bottom:28px; }
+  .gh-btn{
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:var(--burgundy-deep); color:var(--cream);
+    border:none; border-radius:999px;
+    padding:13px 18px; font-size:0.95rem; cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .gh-btn:hover{ background:var(--burgundy); transform:translateY(-1px); }
+  .gh-btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .login-note{ margin-top:20px; font-size:0.78rem; color:var(--ink-soft); line-height:1.5; }
+  .login-error{
+    margin-top:16px; padding:10px 14px; border-radius:6px;
+    background:var(--danger-bg); color:var(--danger); font-size:0.82rem; display:none;
+  }
+  .login-note code{
+    background:var(--beige-bg); padding:1px 5px; border-radius:4px; font-size:0.76rem;
+  }
+
+  /* ---------- DASHBOARD SHELL ---------- */
+  #dashboard{ display:none; min-height:100vh; }
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(251,245,233,0.95);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .topbar .brand{
+    font-family:'Fraunces', serif; font-style:italic; font-size:1.15rem; color:var(--burgundy-deep);
+  }
+  .topbar .brand small{
+    display:block; font-family:'Work Sans',sans-serif; font-style:normal; font-size:0.68rem;
+    letter-spacing:0.04em; color:var(--ink-soft); margin-top:1px;
+  }
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .icon-btn-sm{
+    display:flex; align-items:center; gap:6px;
+    background:transparent; border:1px solid var(--line);
+    border-radius:999px; padding:7px 13px;
+    font-size:0.8rem; color:var(--ink); cursor:pointer;
+    transition:background .2s ease, border-color .2s ease;
+  }
+  .icon-btn-sm:hover{ background:var(--cream); border-color:var(--burgundy-mid); }
+
+  main.wrap{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
+
+  /* ---------- ACTION GRID (the 6 required buttons) ---------- */
+  .action-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:10px;
+    margin-bottom:30px;
+  }
+  .action-btn{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:5px;
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 6px;
+    cursor:pointer;
+    font-size:0.72rem;
+    color:var(--ink);
+    text-align:center;
+    min-height:64px;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .action-btn .ic{ font-size:1.25rem; line-height:1; }
+  .action-btn:hover{ border-color:var(--burgundy-mid); box-shadow:0 8px 18px -12px rgba(62,17,32,0.4); transform:translateY(-1px); }
+  .action-btn:active{ transform:translateY(0); }
+  .action-btn.active{ background:var(--burgundy-deep); color:var(--cream); border-color:var(--burgundy-deep); }
+
+  /* ---------- STATUS BAR ---------- */
+  .status-bar{
+    display:none;
+    align-items:center; gap:8px;
+    background:var(--cream); border:1px solid var(--line); border-radius:6px;
+    padding:10px 14px; margin-bottom:20px;
+    font-size:0.85rem; color:var(--ink-soft);
+  }
+  .status-bar.show{ display:flex; }
+  .status-bar.err{ background:var(--danger-bg); color:var(--danger); border-color:transparent; }
+  .status-bar.ok{ background:rgba(119,130,106,0.12); color:var(--sage); border-color:transparent; }
+  .spinner{
+    width:14px; height:14px; border-radius:50%;
+    border:2px solid rgba(90,74,72,0.25); border-top-color:var(--ink-soft);
+    animation:spin .7s linear infinite; flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- PAINTINGS LIST ---------- */
+  .section-title{
+    font-size:1.05rem; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title span.count{ font-family:'Work Sans',sans-serif; font-size:0.78rem; color:var(--ink-soft); font-weight:400; }
+
+  .paintings-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:16px;
+  }
+  .p-card{
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .p-thumb{
+    aspect-ratio:4/3;
+    background:var(--beige-bg);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .p-thumb img{ width:100%; height:100%; object-fit:contain; }
+  .p-body{ padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
+  .p-title{ font-family:'Fraunces', serif; font-style:italic; font-size:0.98rem; color:var(--burgundy-deep); }
+  .p-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:6px; font-size:0.8rem; }
+  .p-price{ color:var(--burgundy); }
+  .p-badge{ font-size:0.68rem; padding:2px 9px; border-radius:999px; }
+  .p-badge.avail{ background:rgba(119,130,106,0.15); color:var(--sage); }
+  .p-badge.sold{ background:rgba(107,35,56,0.1); color:var(--burgundy); }
+  .p-actions{ display:flex; gap:8px; margin-top:12px; }
+  .p-actions button{
+    flex:1;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    border:1px solid var(--line); background:transparent;
+    border-radius:7px; padding:7px 6px; font-size:0.76rem; color:var(--ink);
+    cursor:pointer; transition:background .15s ease, border-color .15s ease;
+  }
+  .p-actions button:hover{ background:var(--beige-bg); border-color:var(--burgundy-mid); }
+  .p-actions button.danger:hover{ background:var(--danger-bg); border-color:var(--danger); color:var(--danger); }
+
+  .empty-state{
+    grid-column:1/-1;
+    text-align:center; padding:50px 20px; color:var(--ink-soft);
+    font-family:'Fraunces', serif; font-style:italic;
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal-backdrop{
+    display:none;
+    position:fixed; inset:0; z-index:100;
+    background:rgba(43,27,29,0.45);
+    align-items:flex-start; justify-content:center;
+    padding:24px 16px;
+    overflow-y:auto;
+  }
+  .modal-backdrop.show{ display:flex; }
+  .modal{
+    width:100%; max-width:460px;
+    background:var(--cream);
+    border-radius:10px;
+    padding:26px 24px 24px;
+    margin-top:26px;
+    box-shadow:0 30px 60px -20px rgba(62,17,32,0.5);
+  }
+  .modal h2{ font-size:1.2rem; margin-bottom:18px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.8rem; color:var(--ink-soft); margin-bottom:6px; }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field textarea,
+  .field select{
+    width:100%;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:6px;
+    padding:10px 12px;
+    font-family:inherit; font-size:0.9rem; color:var(--ink);
+  }
+  .field textarea{ resize:vertical; min-height:70px; }
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; }
+  .switch{ position:relative; width:44px; height:24px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .slider{
+    position:absolute; inset:0; background:rgba(90,74,72,0.3); border-radius:999px; cursor:pointer;
+    transition:background .2s ease;
+  }
+  .slider::before{
+    content:''; position:absolute; width:18px; height:18px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:transform .2s ease;
+  }
+  .switch input:checked + .slider{ background:var(--sage); }
+  .switch input:checked + .slider::before{ transform:translateX(20px); }
+
+  .file-drop{
+    border:1.5px dashed rgba(62,17,32,0.3);
+    border-radius:8px;
+    padding:16px; text-align:center; cursor:pointer;
+    color:var(--ink-soft); font-size:0.85rem;
+    background:var(--beige-bg);
+  }
+  .file-drop input{ display:none; }
+  .file-preview{ margin-top:10px; max-height:160px; overflow:hidden; border-radius:6px; display:none; }
+  .file-preview img{ width:100%; object-fit:contain; max-height:160px; }
+
+  .modal-actions{ display:flex; gap:10px; margin-top:22px; }
+  .btn{
+    flex:1;
+    padding:11px 16px; border-radius:999px; border:none; font-size:0.9rem; cursor:pointer;
+    transition:background .2s ease, opacity .2s ease;
+  }
+  .btn-primary{ background:var(--burgundy-deep); color:var(--cream); }
+  .btn-primary:hover{ background:var(--burgundy); }
+  .btn-primary:disabled{ opacity:0.55; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .btn-ghost:hover{ background:var(--beige-bg); }
+  .btn-danger{ background:var(--danger); color:#fff; }
+  .btn-danger:hover{ opacity:0.9; }
+
+  .picker-list{ display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; margin-bottom:6px; }
+  .picker-item{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid var(--line); border-radius:7px; padding:8px 10px;
+    cursor:pointer; background:#fff; text-align:left;
+  }
+  .picker-item:hover{ border-color:var(--burgundy-mid); background:var(--beige-bg); }
+  .picker-item img{ width:38px; height:38px; object-fit:cover; border-radius:5px; flex-shrink:0; }
+  .picker-item .pt{ font-size:0.88rem; color:var(--ink); }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 820px){
+    .action-grid{ grid-template-columns:repeat(3, 1fr); }
+  }
+  @media (max-width: 480px){
+    .topbar .brand{ font-size:1rem; }
+    .icon-btn-sm span.label{ display:none; }
+    .icon-btn-sm{ padding:8px; }
+    main.wrap{ padding:16px 14px 50px; }
+    .action-grid{ grid-template-columns:repeat(3, 1fr); gap:8px; }
+    .action-btn{ min-height:58px; font-size:0.66rem; padding:10px 4px; }
+    .action-btn .ic{ font-size:1.1rem; }
+    .paintings-grid{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+    .modal{ padding:22px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="brand">Nour's Art Book</div>
+    <div class="sub">Admin Dashboard</div>
+    <button class="gh-btn" id="loginBtn">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      Sign in with GitHub
+    </button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-note">
+      Only a GitHub account with access to this repository can sign in.<br>
+      First time here? See the setup checklist near the bottom of this page's source, or ask Claude.
+    </div>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard">
+  <header class="topbar">
+    <div class="brand">Nour's Art Book<small>ADMIN DASHBOARD</small></div>
+    <div class="topbar-right">
+      <button class="icon-btn-sm" id="logoutBtn"><span>🚪</span><span class="label">Log out</span></button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="action-grid">
+      <button class="action-btn active" data-action="paintings"><span class="ic">🎨</span>Paintings</button>
+      <button class="action-btn" data-action="add"><span class="ic">➕</span>Add Painting</button>
+      <button class="action-btn" data-action="edit"><span class="ic">✏️</span>Edit</button>
+      <button class="action-btn" data-action="delete"><span class="ic">🗑️</span>Delete</button>
+      <button class="action-btn" data-action="upload"><span class="ic">📷</span>Upload Image</button>
+      <button class="action-btn" data-action="view"><span class="ic">🌐</span>View Website</button>
+    </div>
+
+    <div class="status-bar" id="statusBar"><div class="spinner"></div><span id="statusText"></span></div>
+
+    <div class="section-title">
+      <h2>Paintings</h2>
+      <span class="count" id="paintingCount"></span>
+    </div>
+    <div class="paintings-grid" id="paintingsGrid"></div>
+  </main>
+</div>
+
+<!-- ================= ADD / EDIT MODAL ================= -->
+<div class="modal-backdrop" id="editModalBackdrop">
+  <div class="modal">
+    <h2 id="editModalTitle">Add Painting</h2>
+    <form id="editForm">
+      <div class="field">
+        <label for="fTitle">Title</label>
+        <input type="text" id="fTitle" required>
+      </div>
+      <div class="field">
+        <label for="fDescription">Description</label>
+        <textarea id="fDescription" placeholder="A few words about this piece…"></textarea>
+      </div>
+      <div class="field">
+        <label for="fPrice">Price</label>
+        <input type="text" id="fPrice" placeholder="e.g. $220 or Inquire for price">
+      </div>
+      <div class="field">
+        <label>Image</label>
+        <div class="file-drop" id="fileDropZone">
+          <span id="fileDropLabel">Tap to choose a photo of the painting</span>
+          <input type="file" id="fImage" accept="image/*">
+        </div>
+        <div class="file-preview" id="filePreview"><img id="filePreviewImg" alt=""></div>
+      </div>
+      <div class="field toggle-row">
+        <label for="fAvailable" style="margin:0;">Available for purchase</label>
+        <label class="switch">
+          <input type="checkbox" id="fAvailable" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="editCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="editSaveBtn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= PICKER MODAL (used by Edit / Delete / Upload Image) ================= -->
+<div class="modal-backdrop" id="pickerModalBackdrop">
+  <div class="modal">
+    <h2 id="pickerModalTitle">Choose a painting</h2>
+    <div class="picker-list" id="pickerList"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="pickerCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= QUICK IMAGE-ONLY UPLOAD MODAL ================= -->
+<div class="modal-backdrop" id="uploadModalBackdrop">
+  <div class="modal">
+    <h2>Replace Image</h2>
+    <p style="font-size:0.85rem;color:var(--ink-soft);margin:-10px 0 16px;" id="uploadTargetLabel"></p>
+    <div class="field">
+      <div class="file-drop" id="uploadDropZone">
+        <span id="uploadDropLabel">Tap to choose a new photo</span>
+        <input type="file" id="uploadImageInput" accept="image/*">
+      </div>
+      <div class="file-preview" id="uploadPreview"><img id="uploadPreviewImg" alt=""></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="uploadCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="uploadSaveBtn" disabled>Save Image</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DELETE CONFIRM MODAL ================= -->
+<div class="modal-backdrop" id="deleteModalBackdrop">
+  <div class="modal">
+    <h2>Delete this painting?</h2>
+    <p style="font-size:0.9rem;color:var(--ink-soft);" id="deleteConfirmText"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="deleteCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-danger" id="deleteConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG — edit these five values for your own site before using this file.
+   See the setup notes Claude gave you for where each one comes from.
+   ========================================================================= */
+const CONFIG = {
+  owner: "YOUR_GITHUB_USERNAME",          // e.g. "nourartbook"
+  repo: "YOUR_REPO_NAME",                 // e.g. "noursartbook.github.io"
+  branch: "main",                         // the branch your GitHub Pages site deploys from
+  netlifyAuthSite: "https://YOUR-AUTH-SITE.netlify.app", // the small Netlify site used only for login
+  publicSiteUrl: "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/" // your live public site
+};
+/* ========================================================================= */
+
+const DATA_PATH = "content/paintings.json";
+const IMAGE_FOLDER = "images/paintings";
+const TOKEN_KEY = "nab_admin_token";
+
+let paintings = [];
+let dataSha = null;      // sha of content/paintings.json, needed to save
+let editingId = null;    // id of the painting currently being edited, null = adding new
+let pendingImageFile = null;
+let uploadTargetId = null;
+let deleteTargetId = null;
+
+// ---------------- Auth ----------------
+function getToken(){ return sessionStorage.getItem(TOKEN_KEY); }
+function setToken(t){ sessionStorage.setItem(TOKEN_KEY, t); }
+function clearToken(){ sessionStorage.removeItem(TOKEN_KEY); }
+
+function showLoginError(msg){
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+document.getElementById('loginBtn').addEventListener('click', startLogin);
+
+function startLogin(){
+  const el = document.getElementById('loginError');
+  el.style.display = 'none';
+
+  if(CONFIG.owner === "YOUR_GITHUB_USERNAME"){
+    showLoginError("This dashboard hasn't been configured yet — edit the CONFIG block in admin/index.html first.");
+    return;
+  }
+
+  const authUrl = CONFIG.netlifyAuthSite.replace(/\/$/, '') + '/auth?provider=github&scope=repo';
+  const popup = window.open(authUrl, 'nab-github-auth', 'width=600,height=700');
+
+  if(!popup){
+    showLoginError("Your browser blocked the login popup — please allow popups for this site and try again.");
+    return;
+  }
+
+  function handleMessage(e){
+    const data = e.data;
+    if(typeof data !== 'string') return;
+
+    if(data.indexOf('authorizing:github') === 0){
+      // handshake step: acknowledge back to the popup
+      popup.postMessage('authorizing:github', '*');
+      return;
+    }
+    if(data.indexOf('authorization:github:success:') === 0){
+      try{
+        const payload = JSON.parse(data.slice('authorization:github:success:'.length));
+        setToken(payload.token);
+        window.removeEventListener('message', handleMessage);
+        try{ popup.close(); }catch(_){}
+        enterDashboard();
+      }catch(err){
+        showLoginError("Login succeeded but the response couldn't be read. Please try again.");
+      }
+      return;
+    }
+    if(data.indexOf('authorization:github:error:') === 0){
+      window.removeEventListener('message', handleMessage);
+      try{ popup.close(); }catch(_){}
+      showLoginError("GitHub login failed or was cancelled.");
+    }
+  }
+  window.addEventListener('message', handleMessage);
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  clearToken();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+});
+
+// ---------------- GitHub API helpers ----------------
+async function ghRequest(path, options = {}){
+  const res = await fetch('https://api.github.com/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/' + path, {
+    ...options,
+    headers:{
+      'Authorization': 'token ' + getToken(),
+      'Accept': 'application/vnd.github+json',
+      ...(options.headers || {})
+    }
+  });
+  if(res.status === 401){
+    clearToken();
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    showLoginError("Your session expired — please sign in again.");
+    throw new Error('Unauthorized');
+  }
+  return res;
+}
+
+function utf8ToBase64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+
+async function loadPaintingsFromGitHub(){
+  setStatus('loading', 'Loading your paintings…');
+  const res = await ghRequest('contents/' + DATA_PATH + '?ref=' + CONFIG.branch);
+  if(!res.ok){
+    setStatus('error', "Couldn't load paintings.json — check the CONFIG values and repo permissions.");
+    throw new Error('Failed to load data file');
+  }
+  const json = await res.json();
+  dataSha = json.sha;
+  paintings = JSON.parse(base64ToUtf8(json.content));
+  clearStatus();
+  renderPaintings();
+}
+
+async function savePaintingsToGitHub(commitMessage){
+  setStatus('loading', 'Saving…');
+  const body = {
+    message: commitMessage,
+    content: utf8ToBase64(JSON.stringify(paintings, null, 2)),
+    sha: dataSha,
+    branch: CONFIG.branch
+  };
+  const res = await ghRequest('contents/' + DATA_PATH, {
+    method: 'PUT',
+    headers:{ 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    setStatus('error', 'Save failed — please try again.');
+    throw new Error('Failed to save data file');
+  }
+  const json = await res.json();
+  dataSha = json.content.sha;
+  setStatus('ok', 'Saved — your site updates within a minute or two.');
+  setTimeout(clearStatus, 3500);
+}
+
+async function uploadImageToGitHub(file, filename){
+  const base64 = await fileToBase64(file);
+  const path = IMAGE_FOLDER + '/' + filename;
+
+  // check if a file already exists at this path, to get its sha for overwrite
+  let sha = undefined;
+  const existing = await ghRequest('contents/' + path + '?ref=' + CONFIG.branch);
+  if(existing.ok){
+    const existingJson = await existing.json();
+    sha = existingJson.sha;
+  }
+
+  const body = {
+    message: (sha ? 'Update image: ' : 'Add image: ') + filename,
+    content: base64,
+    branch: CONFIG.branch
+  };
+  if(sha) body.sha = sha;
+
+  const res = await ghRequest('contents/' + path, {
+    method: 'PUT',
+    headers:{ 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    throw new Error('Image upload failed');
+  }
+  return path;
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function getImageOrientation(file){
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      resolve(img.naturalWidth / img.naturalHeight > 1.2 ? 'landscape' : 'portrait');
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => resolve('portrait');
+    img.src = url;
+  });
+}
+
+// ---------------- Status bar ----------------
+function setStatus(kind, text){
+  const bar = document.getElementById('statusBar');
+  bar.className = 'status-bar show' + (kind === 'error' ? ' err' : kind === 'ok' ? ' ok' : '');
+  document.querySelector('#statusBar .spinner').style.display = kind === 'loading' ? 'block' : 'none';
+  document.getElementById('statusText').textContent = text;
+}
+function clearStatus(){
+  document.getElementById('statusBar').className = 'status-bar';
+}
+
+// ---------------- Enter dashboard ----------------
+async function enterDashboard(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  try{
+    await loadPaintingsFromGitHub();
+  }catch(err){
+    console.error(err);
+  }
+}
+
+// ---------------- Render paintings grid ----------------
+function renderPaintings(){
+  const grid = document.getElementById('paintingsGrid');
+  document.getElementById('paintingCount').textContent = paintings.length + (paintings.length === 1 ? ' painting' : ' paintings');
+
+  if(paintings.length === 0){
+    grid.innerHTML = '<div class="empty-state">No paintings yet — tap "Add Painting" to add your first one.</div>';
+    return;
+  }
+
+  grid.innerHTML = paintings.map(p => `
+    <div class="p-card">
+      <div class="p-thumb"><img src="../${escapeAttr(p.image)}" alt="${escapeAttr(p.title)}" loading="lazy"></div>
+      <div class="p-body">
+        <div class="p-title">${escapeHtml(p.title)}</div>
+        <div class="p-meta">
+          <span class="p-price">${escapeHtml(p.price || '')}</span>
+          <span class="p-badge ${p.available !== false ? 'avail' : 'sold'}">${p.available !== false ? 'Available' : 'Sold'}</span>
+        </div>
+        <div class="p-actions">
+          <button data-edit="${escapeAttr(p.id)}">✏️ Edit</button>
+          <button class="danger" data-delete="${escapeAttr(p.id)}">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openEditModal(btn.getAttribute('data-edit')));
+  });
+  grid.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => openDeleteModal(btn.getAttribute('data-delete')));
+  });
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str == null ? '' : String(str);
+  return d.innerHTML;
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+// ---------------- Action grid wiring ----------------
+document.querySelectorAll('.action-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('active'));
+    const action = btn.getAttribute('data-action');
+    switch(action){
+      case 'paintings':
+        btn.classList.add('active');
+        document.getElementById('paintingsGrid').scrollIntoView({behavior:'smooth', block:'start'});
+        break;
+      case 'add':
+        openEditModal(null);
+        break;
+      case 'edit':
+        openPicker('edit');
+        break;
+      case 'delete':
+        openPicker('delete');
+        break;
+      case 'upload':
+        openPicker('upload');
+        break;
+      case 'view':
+        window.open(CONFIG.publicSiteUrl, '_blank', 'noopener');
+        break;
+    }
+    if(action !== 'paintings') document.querySelector('[data-action="paintings"]').classList.add('active');
+  });
+});
+
+// ---------------- Picker modal (used by Edit / Delete / Upload Image top buttons) ----------------
+function openPicker(mode){
+  const backdrop = document.getElementById('pickerModalBackdrop');
+  const title = document.getElementById('pickerModalTitle');
+  const list = document.getElementById('pickerList');
+
+  title.textContent = mode === 'edit' ? 'Choose a painting to edit'
+                     : mode === 'delete' ? 'Choose a painting to delete'
+                     : 'Choose a painting to update its image';
+
+  if(paintings.length === 0){
+    list.innerHTML = '<p style="font-size:0.85rem;color:var(--ink-soft);">No paintings yet — add one first.</p>';
+  }else{
+    list.innerHTML = paintings.map(p => `
+      <button type="button" class="picker-item" data-id="${escapeAttr(p.id)}">
+        <img src="../${escapeAttr(p.image)}" alt="">
+        <span class="pt">${escapeHtml(p.title)}</span>
+      </button>
+    `).join('');
+    list.querySelectorAll('.picker-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.getAttribute('data-id');
+        closePicker();
+        if(mode === 'edit') openEditModal(id);
+        else if(mode === 'delete') openDeleteModal(id);
+        else openUploadModal(id);
+      });
+    });
+  }
+  backdrop.classList.add('show');
+}
+function closePicker(){ document.getElementById('pickerModalBackdrop').classList.remove('show'); }
+document.getElementById('pickerCancelBtn').addEventListener('click', closePicker);
+document.getElementById('pickerModalBackdrop').addEventListener('click', (e) => { if(e.target.id === 'pickerModalBackdrop') closePicker(); });
+
+// ---------------- Add / Edit modal ----------------
+function openEditModal(id){
+  editingId = id;
+  pendingImageFile = null;
+  const p = id ? paintings.find(x => x.id === id) : null;
+
+  document.getElementById('editModalTitle').textContent = p ? 'Edit Painting' : 'Add Painting';
+  document.getElementById('fTitle').value = p ? p.title : '';
+  document.getElementById('fDescription').value = p ? (p.description || '') : '';
+  document.getElementById('fPrice').value = p ? (p.price || '') : '';
+  document.getElementById('fAvailable').checked = p ? p.available !== false : true;
+  document.getElementById('fImage').value = '';
+  document.getElementById('fileDropLabel').textContent = 'Tap to choose a photo of the painting';
+
+  const preview = document.getElementById('filePreview');
+  const previewImg = document.getElementById('filePreviewImg');
+  if(p && p.image){
+    previewImg.src = '../' + p.image;
+    preview.style.display = 'block';
+  }else{
+    preview.style.display = 'none';
+  }
+
+  document.getElementById('editModalBackdrop').classList.add('show');
+}
+function closeEditModal(){ document.getElementById('editModalBackdrop').classList.remove('show'); }
+document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+document.getElementById('editModalBackdrop').addEventListener('click', (e) => { if(e.target.id === 'editModalBackdrop') closeEditModal(); });
+
+document.getElementById('fileDropZone').addEventListener('click', () => document.getElementById('fImage').click());
+document.getElementById('fImage').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  pendingImageFile = file;
+  document.getElementById('fileDropLabel').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('filePreviewImg').src = reader.result;
+    document.getElementById('filePreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const saveBtn = document.getElementById('editSaveBtn');
+  saveBtn.disabled = true;
+
+  const title = document.getElementById('fTitle').value.trim();
+  const description = document.getElementById('fDescription').value.trim();
+  const price = document.getElementById('fPrice').value.trim();
+  const available = document.getElementById('fAvailable').checked;
+
+  if(!title){ saveBtn.disabled = false; return; }
+
+  try{
+    let entry = editingId ? paintings.find(x => x.id === editingId) : null;
+    const isNew = !entry;
+
+    if(isNew){
+      const id = slugify(title, paintings.map(p => p.id));
+      entry = { id, title, description, price, available, image: '' };
+      paintings.push(entry);
+    }else{
+      entry.title = title;
+      entry.description = description;
+      entry.price = price;
+      entry.available = available;
+    }
+
+    if(pendingImageFile){
+      setStatus('loading', 'Uploading image…');
+      const ext = (pendingImageFile.name.split('.').pop() || 'jpg').toLowerCase();
+      const filename = entry.id + '.' + ext;
+      const orientation = await getImageOrientation(pendingImageFile);
+      const path = await uploadImageToGitHub(pendingImageFile, filename);
+      entry.image = path;
+      entry.orientation = orientation;
+    }else if(isNew){
+      setStatus('error', 'Please choose an image for this painting.');
+      paintings.pop();
+      saveBtn.disabled = false;
+      return;
+    }
+
+    await savePaintingsToGitHub((isNew ? 'Add painting: ' : 'Update painting: ') + title);
+    closeEditModal();
+    renderPaintings();
+  }catch(err){
+    console.error(err);
+    setStatus('error', 'Something went wrong saving this painting — please try again.');
+  }finally{
+    saveBtn.disabled = false;
+  }
+});
+
+function slugify(title, existingIds){
+  let base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'painting';
+  let slug = base, n = 2;
+  while(existingIds.includes(slug)){ slug = base + '-' + n; n++; }
+  return slug;
+}
+
+// ---------------- Quick "Upload Image" modal ----------------
+let pendingUploadFile = null;
+function openUploadModal(id){
+  uploadTargetId = id;
+  pendingUploadFile = null;
+  const p = paintings.find(x => x.id === id);
+  document.getElementById('uploadTargetLabel').textContent = 'For: ' + (p ? p.title : '');
+  document.getElementById('uploadImageInput').value = '';
+  document.getElementById('uploadDropLabel').textContent = 'Tap to choose a new photo';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('uploadSaveBtn').disabled = true;
+  document.getElementById('uploadModalBackdrop').classList.add('show');
+}
+function closeUploadModal(){ document.getElementById('uploadModalBackdrop').classList.remove('show'); }
+document.getElementById('uploadCancelBtn').addEventListener('click', closeUploadModal);
+document.getElementById('uploadModalBackdrop').addEventListener('click', (e) => { if(e.target.id === 'uploadModalBackdrop') closeUploadModal(); });
+document.getElementById('uploadDropZone').addEventListener('click', () => document.getElementById('uploadImageInput').click());
+document.getElementById('uploadImageInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  pendingUploadFile = file;
+  document.getElementById('uploadDropLabel').textContent = file.name;
+  document.getElementById('uploadSaveBtn').disabled = false;
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('uploadPreviewImg').src = reader.result;
+    document.getElementById('uploadPreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById('uploadSaveBtn').addEventListener('click', async () => {
+  if(!pendingUploadFile || !uploadTargetId) return;
+  const btn = document.getElementById('uploadSaveBtn');
+  btn.disabled = true;
+  try{
+    const entry = paintings.find(x => x.id === uploadTargetId);
+    setStatus('loading', 'Uploading image…');
+    const ext = (pendingUploadFile.name.split('.').pop() || 'jpg').toLowerCase();
+    const filename = entry.id + '.' + ext;
+    const orientation = await getImageOrientation(pendingUploadFile);
+    const path = await uploadImageToGitHub(pendingUploadFile, filename);
+    entry.image = path;
+    entry.orientation = orientation;
+    await savePaintingsToGitHub('Update image: ' + entry.title);
+    closeUploadModal();
+    renderPaintings();
+  }catch(err){
+    console.error(err);
+    setStatus('error', 'Image upload failed — please try again.');
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+// ---------------- Delete confirm modal ----------------
+function openDeleteModal(id){
+  deleteTargetId = id;
+  const p = paintings.find(x => x.id === id);
+  document.getElementById('deleteConfirmText').textContent =
+    'This removes "' + (p ? p.title : '') + '" from your public gallery. This can\'t be undone from the dashboard.';
+  document.getElementById('deleteModalBackdrop').classList.add('show');
+}
+function closeDeleteModal(){ document.getElementById('deleteModalBackdrop').classList.remove('show'); }
+document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
+document.getElementById('deleteModalBackdrop').addEventListener('click', (e) => { if(e.target.id === 'deleteModalBackdrop') closeDeleteModal(); });
+document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true;
+  try{
+    const entry = paintings.find(x => x.id === deleteTargetId);
+    paintings = paintings.filter(x => x.id !== deleteTargetId);
+    await savePaintingsToGitHub('Delete painting: ' + (entry ? entry.title : deleteTargetId));
+    closeDeleteModal();
+    renderPaintings();
+  }catch(err){
+    console.error(err);
+    setStatus('error', 'Delete failed — please try again.');
+    await loadPaintingsFromGitHub(); // resync in case of partial failure
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+// ---------------- Boot ----------------
+(function boot(){
+  if(getToken()){
+    enterDashboard();
+  }
+})();
+</script>
+</body>
+</html>
