@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nour's Art Book — Original Acrylic Paintings & Commissions</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fbf6ee;color:#3b2a20;font:17px/1.65 Georgia,'Times New Roman',serif}
+nav{position:sticky;top:0;background:#fbf6ee;border-bottom:1px solid #eadfce;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:12px 5%;z-index:5}
+nav b{font-size:1.25rem;margin-right:auto}
+a{color:#c4623f;text-decoration:none}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+section{padding:52px 5%;max-width:1100px;margin:auto}
+h1{font-size:clamp(2rem,6vw,3.2rem);line-height:1.15;margin:.2em 0}
+h2{font-size:2rem;margin:0 0 .4em}
+.mut{color:#7a6a5e}
+.btn,button{font:inherit;font-size:.95rem;border:1px solid #c4623f;background:none;color:#c4623f;padding:8px 18px;border-radius:99px;cursor:pointer;display:inline-block;margin:2px}
+.pri{background:#c4623f;color:#fff}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;margin-top:18px}
+.c{background:#fff;border:1px solid #eadfce;border-radius:14px;overflow:hidden}
+.t{padding:14px}
+.im{aspect-ratio:4/5;background:linear-gradient(135deg,#e9c9a7,#d98c6a);object-fit:cover;width:100%;display:block}
+.tag{font-size:.75rem;padding:2px 10px;border-radius:99px;border:1px solid #eadfce}
+.sold{color:#b3261e;border-color:#b3261e}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.steps div{background:#fff;border:1px solid #eadfce;border-radius:12px;padding:14px}
+footer{text-align:center;padding:30px;color:#7a6a5e}
+.fab{position:fixed;right:16px;bottom:16px}
+.ad{max-width:800px;margin:auto;padding:0 5% 80px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:14px 0}
+.row{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #eadfce;border-radius:12px;padding:10px;margin:10px 0;flex-wrap:wrap}
+.row .im{width:64px;aspect-ratio:1;border-radius:8px}
+.row span{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+label{display:block;margin:12px 0;font-weight:bold}
+input,textarea,select{display:block;width:100%;font:inherit;padding:9px;margin-top:4px;border:1px solid #eadfce;border-radius:8px}
+</style></head><body><div id="app">Loading…</div>
+<script>
+const U='https://iidugrjnzhkimjjaqpag.supabase.co',K='sb_publishable_uUXUEo0IrsnZ7dCr3sSTrQ_9onjCmA5',IG='https://www.instagram.com/noursartbook/';
+const $=s=>document.querySelector(s),E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+let P=[],S=JSON.parse(localStorage.getItem('nab')||'null'),fl='All',ed=null,view=location.hash=='#admin'?(S?'list':'login'):'site';
+const H=t=>({apikey:K,'Content-Type':'application/json',...(t?{Authorization:'Bearer '+t}:{})});
+async function load(){try{const r=await fetch(U+'/rest/v1/paintings?select=*&order=sort_order',{headers:H()});if(!r.ok)throw 0;P=await r.json()}catch(e){P=null}}
+function save(j){S={at:j.access_token,rt:j.refresh_token,exp:Math.floor(Date.now()/1e3)+j.expires_in};localStorage.setItem('nab',JSON.stringify(S))}
+async function tok(){if(!S)return null;if(S.exp-60<Date.now()/1e3){const r=await fetch(U+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:H(),body:JSON.stringify({refresh_token:S.rt})});if(!r.ok){S=null;localStorage.removeItem('nab');return null}save(await r.json())}return S.at}
+async function login(){const r=await fetch(U+'/auth/v1/token?grant_type=password',{method:'POST',headers:H(),body:JSON.stringify({email:$('#em').value.trim(),password:$('#pw').value})});if(!r.ok){alert('Wrong email or password');return}save(await r.json());go('list')}
+function out(){S=null;localStorage.removeItem('nab');history.replaceState(0,'','#');go('site')}
+async function api(m,q,b){const t=await tok();if(!t){alert('Please log in again');go('login');return null}const r=await fetch(U+'/rest/v1/paintings'+q,{method:m,headers:{...H(t),Prefer:'return=minimal'},body:b?JSON.stringify(b):undefined});if(!r.ok){alert('Could not save: '+await r.text());return null}return true}
+const im=p=>p.image_url?`<img class=im src="${E(p.image_url)}" alt="${E(p.name)}">`:'<div class=im></div>';
+function card(p){return `<div class=c>${im(p)}<div class=t><b>${E(p.name)}</b><p class=mut style="margin:.3em 0">${E(p.description)}</p><span class="tag ${p.status=='sold'?'sold':''}">${p.status=='sold'?'Sold':'Available'}</span> ${p.category?`<span class=tag>${E(p.category)}</span>`:''}<div>${E(p.price)}</div></div></div>`}
+function site(){const L=P||[],cs=['All',...new Set(L.map(p=>p.category).filter(Boolean))],F=L.filter(p=>fl=='All'||p.category==fl);
+return `<nav><b>Nour's Art Book</b><a href="#about">About Me</a><a href="#art">My Art</a><a href="#commissions">Commissions</a><a href="#contact">Contact</a><a href="${IG}">Instagram</a></nav>
+<section><p class=mut>Acrylic on canvas, painted by hand</p><h1>Colour, texture, and quiet stories on canvas.</h1><p>I'm Nour — I paint the small, warm moments in acrylic. Welcome to my art book: a home for finished pieces, works in progress, and commissions made just for you.</p><a class="btn pri" href="#art">View My Art</a> <a class=btn href="#commissions">Commission a Piece</a></section>
+<section id=about><h2>About the artist</h2><p>Hi, I'm Nour. I've been painting with acrylics for as long as I can remember, and now I share a small practice with the world. I'm drawn to warm palettes, everyday moments, and textures you want to reach out and touch. Every piece starts on real canvas, mixed and layered by hand.</p></section>
+<section id=art><h2>My Art</h2><p class=mut>A growing collection of original acrylic paintings, made with real paint and real canvas.</p>${cs.length>2?cs.map(c=>`<button class="${c==fl?'pri':''}" data-c="${E(c)}" onclick="fl=this.dataset.c;render()">${E(c)}</button>`).join(''):''}${P===null?'<p>The gallery could not load right now. Please try again soon.</p>':''}<div class=g>${F.map(card).join('')}</div></section>
+<section id=commissions><h2>Commissions</h2><p>I take on a limited number of custom acrylic commissions — portraits, pet paintings, and personal pieces.</p><div class=steps><div><b>01 Message me</b><br>Send a DM on Instagram with your idea, photos, and size.</div><div><b>02 Get a quote</b><br>I'll reply with pricing and timeline.</div><div><b>03 I paint</b><br>I'll share progress shots along the way.</div><div><b>04 You receive it</b><br>Pickup, delivery, or shipping.</div></div></section>
+<section id=contact><h2>Let's Talk Art</h2><p>Questions, commission ideas, or just want to say hi? Instagram is the best place to reach me.</p><a class="btn pri" href="${IG}">Message Me on Instagram</a></section>
+<footer>Nour's Art Book — original acrylic paintings & commissions. © Nour. All artwork rights reserved.</footer>`+(S?`<div class=fab><button class=pri onclick="go('list')">⚙ Admin</button></div>`:'')}
+const bar=()=>`<div class=bar><b style="margin-right:auto">Admin</b><button onclick="go('list')">Paintings</button><button onclick="edit(null)">+ Add Painting</button><button onclick="go('site')">Website Preview</button><button onclick="out()">Logout</button></div>`;
+function loginH(){return `<div class=ad><h2>Admin login</h2><label>Email<input id=em type=email></label><label>Password<input id=pw type=password onkeydown="if(event.key=='Enter')login()"></label><button class=pri onclick="login()">Log in</button> <button onclick="go('site')">Back to website</button></div>`}
+function list(){return `<div class=ad>${bar()}<h2>Paintings</h2>${(P||[]).map((p,i)=>`<div class=row>${im(p)}<div><b>${E(p.name)}</b><br><small class=mut>${E(p.price)} · ${p.status}${p.category?' · '+E(p.category):''}</small></div><span><button onclick="mv(${i},-1)">▲</button><button onclick="mv(${i},1)">▼</button><button onclick="edit(${p.id})">Edit</button><button onclick="del(${p.id})">Delete</button></span></div>`).join('')||'<p class=mut>No paintings yet.</p>'}</div>`}
+function edit(id){ed=id?{...P.find(p=>p.id==id)}:{name:'',description:'',price:'',status:'available',category:'',image_url:''};go('form')}
+function form(){const p=ed,cs=[...new Set((P||[]).map(x=>x.category).filter(Boolean))];return `<div class=ad>${bar()}<h2>${p.id?'Edit':'Add'} Painting</h2>
+<label>Upload Image<input type=file accept="image/*" onchange="pick(this.files[0])"></label><small id=st class=mut></small><img id=pv class=im style="max-width:220px;border-radius:10px;${p.image_url?'':'display:none'}" src="${E(p.image_url)}">
+<label>Name<input id=fn value="${E(p.name)}"></label>
+<label>Description<textarea id=fd rows=4>${E(p.description)}</textarea></label>
+<label>Price<input id=fp value="${E(p.price)}" placeholder="e.g. $120"></label>
+<label>Status<select id=fs><option value=available>Available</option><option value=sold ${p.status=='sold'?'selected':''}>Sold</option></select></label>
+<label>Category (optional)<input id=fc list=cl value="${E(p.category)}"><datalist id=cl>${cs.map(c=>`<option value="${E(c)}">`).join('')}</datalist></label>
+<button class=pri onclick="keep()">Save Painting</button> <button onclick="go('list')">Cancel</button></div>`}
+function shrink(f){return new Promise(r=>{const i=new Image;i.onload=()=>{const k=Math.min(1,1400/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(r,'image/jpeg',.85)};i.src=URL.createObjectURL(f)})}
+async function pick(f){if(!f)return;const t=await tok();if(!t){alert('Please log in again');return}$('#st').textContent=' Uploading…';const n=Date.now()+'.jpg',r=await fetch(U+'/storage/v1/object/paintings/'+n,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+t,'Content-Type':'image/jpeg'},body:await shrink(f)});if(!r.ok){$('#st').textContent=' Upload failed: '+await r.text();return}ed.image_url=U+'/storage/v1/object/public/paintings/'+n;$('#pv').src=ed.image_url;$('#pv').style.display='block';$('#st').textContent=' Uploaded ✓'}
+async function keep(){const b={name:$('#fn').value.trim()||'Untitled',description:$('#fd').value,price:$('#fp').value,status:$('#fs').value,category:$('#fc').value.trim(),image_url:ed.image_url||''};let ok;if(ed.id)ok=await api('PATCH','?id=eq.'+ed.id,b);else{b.sort_order=Math.max(0,...P.map(p=>p.sort_order))+1;ok=await api('POST','',b)}if(ok){await load();go('list')}}
+async function mv(i,d){const j=i+d;if(j<0||j>=P.length)return;const a=P[i],b=P[j];if(await api('PATCH','?id=eq.'+a.id,{sort_order:b.sort_order})&&await api('PATCH','?id=eq.'+b.id,{sort_order:a.sort_order})){await load();render()}}
+async function del(id){const p=P.find(x=>x.id==id);if(!confirm('Delete "'+p.name+'"?'))return;if(await api('DELETE','?id=eq.'+id)){const n=(p.image_url||'').split('/public/paintings/')[1],t=await tok();if(n&&t)fetch(U+'/storage/v1/object/paintings/'+n,{method:'DELETE',headers:{apikey:K,Authorization:'Bearer '+t}});await load();render()}}
+function render(){$('#app').innerHTML=view=='site'?site():view=='login'?loginH():view=='list'?list():form();scrollTo(0,0)}
+function go(v){view=v;render()}
+window.onhashchange=()=>{if(location.hash=='#admin')go(S?'list':'login')};
+load().then(render);
+</script></body></html>
