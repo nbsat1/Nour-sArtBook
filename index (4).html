@@ -72,4 +72,19 @@ function render(){$('#app').innerHTML=view=='site'?site():view=='login'?loginH()
 function go(v){view=v;render()}
 window.onhashchange=()=>{if(location.hash=='#admin')go(S?'list':'login')};
 load().then(render);
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const gallery = document.querySelector(".gallery-grid");
+
+  if (!gallery) return;
+
+  const paintings = Array.from(
+    gallery.querySelectorAll(":scope > .art-card")
+  );
+
+  paintings.reverse().forEach(function (painting) {
+    gallery.prepend(painting);
+  });
+});
+</script>
 </script></body></html>
