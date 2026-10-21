@@ -35,7 +35,7 @@ const U='https://iidugrjnzhkimjjaqpag.supabase.co',K='sb_publishable_uUXUEo0Irsn
 const $=s=>document.querySelector(s),E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 let P=[],S=JSON.parse(localStorage.getItem('nab')||'null'),fl='All',ed=null,view=location.hash=='#admin'?(S?'list':'login'):'site';
 const H=t=>({apikey:K,'Content-Type':'application/json',...(t?{Authorization:'Bearer '+t}:{})});
-async function load(){try{const r=await fetch(U+'/rest/v1/paintings?select=*&order=sort_order.desk',{headers:H()});if(!r.ok)throw 0;P=await r.json()}catch(e){P=null}}
+async function load(){try{const r=await fetch(U+'/rest/v1/paintings?select=*&order=sort_order',{headers:H()});if(!r.ok)throw 0;P=await r.json()}catch(e){P=null}}
 function save(j){S={at:j.access_token,rt:j.refresh_token,exp:Math.floor(Date.now()/1e3)+j.expires_in};localStorage.setItem('nab',JSON.stringify(S))}
 async function tok(){if(!S)return null;if(S.exp-60<Date.now()/1e3){const r=await fetch(U+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:H(),body:JSON.stringify({refresh_token:S.rt})});if(!r.ok){S=null;localStorage.removeItem('nab');return null}save(await r.json())}return S.at}
 async function login(){const r=await fetch(U+'/auth/v1/token?grant_type=password',{method:'POST',headers:H(),body:JSON.stringify({email:$('#em').value.trim(),password:$('#pw').value})});if(!r.ok){alert('Wrong email or password');return}save(await r.json());go('list')}
